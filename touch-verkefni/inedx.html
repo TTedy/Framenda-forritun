@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Touch events: multitouch count</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<style>
+#touch-region {
+   height: 200px;
+   background: #cfcece;
+}
+.circle {
+   margin: 2px;
+   padding: 4px;
+   display: inline-block;
+   border-radius: 100%;
+}
+
+rect {
+          fill: #000;
+          fill-opacity: 0.996528;
+          stroke: #000;
+          stroke-width: 2.5;
+          stroke-linejoin: round;
+          stroke-dasharray: none;
+          stroke-dashoffset: 0;
+          stroke-opacity: 1;
+        }
+    
+        .h {
+          fill: #fd0;
+          animation-name: sequenceAnimation;
+          animation-duration: 200ms; 
+          animation-iteration-count: infinite; 
+          animation-timing-function: ease-in-out; 
+        }
+
+        svg{
+            position: relative;
+            width: 20%;
+            height: 20%;
+        }
+        
+        
+        @keyframes sequenceAnimation {
+          0% {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          25% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+          }
+          75% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+        }
+    
+        .morphingShape {
+          fill: #fd0;
+          animation-name: morphingAnimation;
+          animation-duration: 2s; 
+          animation-iteration-count: infinite;
+          animation-timing-function: linear; 
+        }
+    
+        @keyframes morphingAnimation {
+          0% {
+            d: path('M20,20h50v50h-50Z');
+          }
+          50% {
+            d: path('M20,20h100v100h-100Z');
+          }
+          100% {
+            d: path('M20,20h50v50h-50Z');
+          }
+        }
+</style>
+</head>
+<body>
+<p>Profaðu að snerta kassan fyrir neðan með fleyri en bara ein putta.</p>
+<div id="touch-region"></div>
+<div id="output">0</div>
+<div>
+   <svg id="svg" xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297">
+      <path style="fill:red; fill-opacity: 0.996528; stroke:#000; stroke-width:2.5; stroke-linejoin:round; stroke-dasharray:none; stroke-dashoffset:0; stroke-opacity:1" d="M52.648 130.214c.11-3.94.565-7.657 1.322-11.148 1.467-6.77 4.072-12.694 7.518-17.76a48.1 48.1 0 0 1 10.233-10.895 51.564 51.564 0 0 1 11.605-6.791c8.63-3.654 18.203-5.046 27.5-4.122 6.551.651 12.966 2.453 18.817 5.425 6.831 3.47 12.895 8.534 17.511 15.224 2.923 4.235 5.266 9.123 6.857 14.67 1.37 4.775 2.181 10.04 2.326 15.799v.402c.102 6.583-.54 12.531-1.803 17.867-1.55 6.55-4.034 12.178-7.224 16.93-2.104 3.132-5.513 7.846-11.4 9.947-5.857 2.09-10.262.73-15.278.98-8.794.436-26.147-12.129-28.625-15.931-4.312-6.618 13.049 20.546 4.939 19.831-4.609-.406-21.967-3.987-25.59-6.844-6.342-5.003-11.82-11.457-15.1-19.215-2.992-7.076-4.39-15.236-3.608-24.37" />
+      <rect x="80" y="100" width="50" height="50"/>
+      <rect class="h" x="80" y="100" width="50" height="50"/>
+      <path class="morphingShape" d="M20,20h50v50h-50Z"/>
+      <circle cx="150" cy="150" r="50" fill="yellow"/>
+   </svg>
+</div>
+
+<script>
+var touchRegionElement = document.getElementById('touch-region');
+var outputElement = document.getElementById('output');
+var longPressTimer;
+var toggle = true;
+var svgElement = document.getElementById('svg'); // Corrected her
+var startingAngle;
+
+function showTouchPoints(e) {
+   outputElement.innerText = e.touches.length;
+
+   e.preventDefault();
+   outputElement.innerText = e.touches.length;
+   if (e.touches.length == 2) {
+      console.log("það eru tveir puttar");
+
+      var currentAngle = Math.atan2(e.touches[1].clientY - e.touches[0].clientY, e.touches[1].clientX - e.touches[0].clientX) * 180 / Math.PI;
+      if (startingAngle === undefined) {
+         startingAngle = currentAngle;
+      }
+      var rotation = currentAngle - startingAngle;
+      svgElement.style.transform = 'rotate(' + rotation + 'deg)';
+   } else {
+      startingAngle = undefined; // reset starting angle when not rotating
+   }
+   if (e.touches.length == 3) {
+      console.log("það eru þrír puttar");
+      for (var i = 0; i < e.touches.length; i++) {
+      var touch = e.touches[i];
+
+      // Create a new div element for the dot
+      var dot = document.createElement('div');
+
+      // Style the dot to be green and positioned at the touch point
+      dot.style.position = 'absolute';
+      dot.style.left = touch.clientX + 'px';
+      dot.style.top = touch.clientY + 'px';
+      dot.style.width = '10px';
+      dot.style.height = '10px';
+      dot.style.backgroundColor = 'green';
+      dot.style.borderRadius = '50%';
+
+      // Add the dot to the document
+      document.body.appendChild(dot);
+
+      
+      if (toggle == true) {
+         svgElement.style.display = 'none';
+         toggle = false;
+      } else {
+         svgElement.style.display = 'block';
+         toggle = true;
+      }
+   }
+   
+   }
+}
+
+var startingX, startingY, startingTime;
+
+touchRegionElement.addEventListener('touchstart', function(e) {
+   startingX = e.touches[0].clientX;
+   startingY = e.touches[0].clientY;
+   startingTime = new Date();
+
+   longPressTimer = setTimeout(function() {
+      console.log("long press");
+   }, 2000); // 500 milliseconds for long press
+});
+
+
+touchRegionElement.addEventListener('touchend', function(e) {
+   e.preventDefault();
+
+   clearTimeout(longPressTimer); // clear the timer
+   var dx = e.changedTouches[0].clientX - startingX;
+   var dy = e.changedTouches[0].clientY - startingY;
+   var dTime = new Date() - startingTime;
+
+   if (dy <= -30 && Math.abs(dx) <= 100 && dTime <= 300) {
+      console.log("swipe up");
+   }
+   else if (Math.abs(dx) <= 10 && Math.abs(dy) <= 10 && dTime <= 300) {
+      console.log("tap");
+   }
+});
+
+touchRegionElement.addEventListener('touchstart', showTouchPoints);
+touchRegionElement.addEventListener('touchmove', showTouchPoints);
+touchRegionElement.addEventListener('touchend', showTouchPoints);
+</script>
+
+</body>
+</html>
