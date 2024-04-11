@@ -3,22 +3,20 @@
 	<head>
 		<meta charset="utf-8">
 		<title>My first three.js app</title>
-		<style>
-			body { margin: 0; }
-		</style>
-        <script type="importmap">
-            {
-            "imports": {
-                "three": "https://unpkg.com/three/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three/examples/jsm/"
+        
+		<script type="importmap">
+			{
+			  "imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
 
-                }
-            }
-        </script>  
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+			  }
+			}
+		  </script>
+
 	</head>
 	<body>        
         <p>Hello world 2</p>
  		<script type="module" src="/main.js"></script>
-
 	</body>
 </html>
