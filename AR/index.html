@@ -1,41 +1,74 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Bare minimum HTML5 template</title>
-    </head>
-    <body>
-
-
-      <script src="./main.js"></script>
-    </body>
-<!doctype html>
-<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <title>Hello WebXR!</title>
-
-  <!-- three.js -->
-  <script src="https://unpkg.com/three@0.126.0/build/three.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>WebXR AR with Three.js</title>
+    <script src="https://unpkg.com/three@0.126.0/build/three.js"></script>
 </head>
 <body>
 
-<!-- Starting an immersive WebXR session requires user interaction.
-    We start this one with a simple button. -->
-<button onclick="activateXR()">Start Hello WebXR</button>
+<button onclick="activateXR()">Start AR Experience</button>
+
 <script>
 async function activateXR() {
-  // Add a canvas element and initialize a WebGL context that is compatible with WebXR.
-  const canvas = document.createElement("canvas");
-  document.body.appendChild(canvas);
-  const gl = canvas.getContext("webgl", {xrCompatible: true});
+    const canvas = document.createElement("canvas");
+    document.body.appendChild(canvas);
 
-  // To be continued in upcoming steps.
+    const gl = canvas.getContext("webgl", {xrCompatible: true});
+    const session = await navigator.xr.requestSession("immersive-ar");
+
+    session.addEventListener('end', onSessionEnd);
+
+    // WebXR session setup
+    const xrReferenceSpace = await session.requestReferenceSpace('local');
+    const xrViewerPose = await session.requestAnimationFrame(onXRFrame);
+
+    function onXRFrame(time, xrFrame) {
+        session.requestAnimationFrame(onXRFrame);
+
+        const pose = xrFrame.getViewerPose(xrReferenceSpace);
+        if (pose) {
+            const glLayer = session.renderState.baseLayer;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, glLayer.framebuffer);
+
+            const xrViewport = glLayer.getViewport(pose.views[0]);
+            canvas.width = xrViewport.width;
+            canvas.height = xrViewport.height;
+
+            // WebGLRenderingContext setup
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clearColor(0.2, 0.2, 0.2, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // Three.js code to render 3D objects
+            // Replace this with your own Three.js setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, xrViewport.width / xrViewport.height, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, context: gl });
+            renderer.setSize(xrViewport.width, xrViewport.height);
+
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            cube.position.set(0, 0, -3);
+
+            camera.projectionMatrix.fromArray(pose.views[0].projectionMatrix);
+            camera.matrixWorldInverse.fromArray(pose.views[0].transform.inverse.matrix);
+
+            renderer.render(scene, camera);
+        }
+    }
+
+    function onSessionEnd() {
+        session.removeEventListener('end', onSessionEnd);
+        // Handle session end
+    }
 }
 </script>
+
 </body>
 </html>
-</html>
+
