@@ -8,7 +8,7 @@
 <body>
 
 <div id="info">
-    <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> hit test prufa 8<br/>(Chrome Android
+    <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> hit test prufa 9<br/>(Chrome Android
     81+)
 </div>
 
@@ -45,6 +45,7 @@
         document.body.appendChild(container);
 
         scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xcccccc);
 
         camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
 
@@ -52,12 +53,18 @@
         light.position.set(0.5, 1, 0.25);
         scene.add(light);
 
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(0, 4, 0);
+        directionalLight.castShadow = true; // Enable shadow casting
+        scene.add(directionalLight);
+
         //
 
         renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.xr.enabled = true;
+        renderer.shadowMap.enabled = true; // Enable shadow mapping
         container.appendChild(renderer.domElement);
 
         //
@@ -67,7 +74,7 @@
         //
 
         const loader = new GLTFLoader();
-        const glbPath = 'ball2.glb'; // Change to your GLB model path
+        const glbPath = 'your_model.glb'; // Change to your GLB model path
 
         function onSelect() {
             if (reticle.visible) {
@@ -81,6 +88,12 @@
                 loader.load(glbPath, function (glb) {
                     const model = glb.scene;
                     model.position.set(0, 0, 0); // Position model relative to anchor
+                    model.castShadow = true; // Enable shadow casting for the model
+                    model.traverse(function (child) {
+                        if (child.isMesh) {
+                            child.receiveShadow = true; // Enable shadow receiving for all meshes in the model
+                        }
+                    });
                     anchor.add(model);
                 });
             }
