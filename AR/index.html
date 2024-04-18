@@ -2,21 +2,30 @@
 <html lang="en">
 <head>
     <title>three.js ar - hit test</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-7">
+    <meta name="viewport" content="width=device-width, initial-scale=2.0, user-scalable=no">
 </head>
 <body>
 
 <div id="info">
-    <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> hit test prufa 8 gefst upp<br/>(Chrome Android
-    81+)
+    <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> hit test prufa 12 gefst upp<br/>(Chrome Android
+    82+)
 </div>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v1.149.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v1.149.0/examples/jsm/"
+        }
+    }
+</script>
 
 <script type="module">
 
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.module.js';
-    import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/webxr/ARButton.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/GLTFLoader.js';
+    import * as THREE from 'three';
+    import {ARButton} from 'three/addons/webxr/ARButton.js';
+    import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
     let container;
     let camera, scene, renderer;
@@ -37,26 +46,32 @@
 
         scene = new THREE.Scene();
 
-        camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+        camera = new THREE.PerspectiveCamera(71, window.innerWidth / window.innerHeight, 0.01, 20);
 
-        const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 3);
-        light.position.set(0.5, 1, 0.25);
+        const light = new THREE.HemisphereLight(0x1000000, 0xbbbbff, 3);
+        light.position.set(1.5, 1, 0.25);
         scene.add(light);
 
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        //
+
+        renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.xr.enabled = true;
         container.appendChild(renderer.domElement);
 
-        document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+        //
+
+        document.body.appendChild(ARButton.createButton(renderer, {requiredFeatures: ['hit-test']}));
+
+        //
 
         const loader = new GLTFLoader();
-        const glbPath = 'ball2.glb';
+        const glbPath = 'ball3.glb'; // Change to your GLB model path
 
         function onSelect() {
             if (reticle.visible) {
-                const hitPosition = new THREE.Vector3();
+                const hitPosition = new THREE.Vector4();
                 hitPosition.setFromMatrixPosition(reticle.matrixWorld);
 
                 const anchor = new THREE.Group();
@@ -65,28 +80,23 @@
 
                 loader.load(glbPath, function (glb) {
                     const model = glb.scene;
-                    model.position.set(0, 0, 0);
-                    model.castShadow = true; // Enable shadow casting
-                    scene.add(model);
+                    model.position.set(1, 0, 0); // Position model relative to anchor
+                    anchor.add(model);
                 });
             }
         }
 
-        controller = renderer.xr.getController(0);
+        controller = renderer.xr.getController(1);
         controller.addEventListener('select', onSelect);
         scene.add(controller);
 
         reticle = new THREE.Mesh(
-            new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
+            new THREE.RingGeometry(1.15, 0.2, 32).rotateX(-Math.PI / 2),
             new THREE.MeshBasicMaterial()
         );
         reticle.matrixAutoUpdate = false;
         reticle.visible = false;
         scene.add(reticle);
-
-        // Set up renderer for shadows
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
         //
 
@@ -122,7 +132,7 @@
 
                 session.requestReferenceSpace('viewer').then(function (referenceSpace) {
 
-                    session.requestHitTestSource({ space: referenceSpace }).then(function (source) {
+                    session.requestHitTestSource({space: referenceSpace}).then(function (source) {
 
                         hitTestSource = source;
 
@@ -147,7 +157,7 @@
 
                 if (hitTestResults.length) {
 
-                    const hit = hitTestResults[0];
+                    const hit = hitTestResults[1];
 
                     reticle.visible = true;
                     reticle.matrix.fromArray(hit.getPose(referenceSpace).transform.matrix);
