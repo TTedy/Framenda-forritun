@@ -4,14 +4,25 @@
 		<title>three.js ar - hit test</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link type="text/css" rel="stylesheet" href="main.css">
 	</head>
-
-  <!-- það komu fram vandamál með cdn reyni að node install threejs--> 
-
 	<body>
 
+		<div id="info">
+			<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> ar - hit test<br/>(Chrome Android 81+)
+		</div>
+
+		<script type="importmap">
+			{
+				"imports": {
+				"three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
+				"three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+				}
+			}
+		</script>
+
 		<script type="module">
- 
+
 			import * as THREE from 'three';
 			import { ARButton } from 'three/addons/webxr/ARButton.js';
 
@@ -54,20 +65,20 @@
 
 				//
 
-				const geometry = new THREE.CylinderGeometry( 0.1, 0.1, 0.2, 32 ).translate( 0, 0.1, 0 );
+				const loader = new THREE.GLTFLoader();
+				const glbPath = 'path/to/your/model.glb'; // Change to your GLB model path
 
 				function onSelect() {
+					if (reticle.visible) {
+						const hitPosition = new THREE.Vector3();
+						hitPosition.setFromMatrixPosition(reticle.matrixWorld);
 
-					if ( reticle.visible ) {
-
-						const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
-						const mesh = new THREE.Mesh( geometry, material );
-						reticle.matrix.decompose( mesh.position, mesh.quaternion, mesh.scale );
-						mesh.scale.y = Math.random() * 2 + 1;
-						scene.add( mesh );
-
+						loader.load(glbPath, function (glb) {
+							const model = glb.scene;
+							model.position.copy(hitPosition);
+							scene.add(model);
+						});
 					}
-
 				}
 
 				controller = renderer.xr.getController( 0 );
