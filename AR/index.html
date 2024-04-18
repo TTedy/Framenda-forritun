@@ -5,21 +5,13 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	</head>
+
+  <!-- það komu fram vandamál með cdn reyni að node install threejs--> 
+
 	<body>
 
-
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@/0.163.0/examples/jsm/"
-
-      }
-    }
-    </script>
-
 		<script type="module">
-
+ 
 			import * as THREE from 'three';
 			import { ARButton } from 'three/addons/webxr/ARButton.js';
 
