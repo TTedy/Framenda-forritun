@@ -3,6 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <title>Mediapipe Hand Gesture Recognizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
 </head>
 
 <body>
@@ -12,14 +13,14 @@
             <video id='webcam' autoplay></video>
             <canvas id='output_canvas' width='480' height='360'
                 style='position: absolute; left: 0px; top: 0px;'></canvas>
-            <h1 id='gesture_output'>
+            <h1 id='gesture_output'></h1>
             <h2>X <span id='x_output'></span></h2>
             <h2>Y <span id='y_output'></span></h2>
         </div>
     </div>
 
     <script type='module'>
-        import { GestureRecognizer, FilesetResolver, DrawingUtils } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3';
+        import { GestureRecognizer, FilesetResolver, DrawingUtils,HandLandmarker } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3';
         let gestureRecognizer;
         let runningMode = 'IMAGE';
         let enableWebcamButton;
@@ -97,9 +98,17 @@
 
             if (results.landmarks) {
                 
-                if (gestureOutput.gestures == 'Victory'){
-                    console.log("hello world")
+                console.log(results)
+                
+                switch (gestureOutput.innerText) {
+                    case 'Victory':
+                        console.log("hello world there is a Vicktory");
+                    case 'Open_Palm':
+                        console.log("plam has been OPEND!");
+                    case 'Closed_Fist':
+                        console.log("palm has been CLOSED!");
                 }
+                
 
                 for (const landmarks of results.landmarks) {
                     drawingUtils.drawConnectors(landmarks, GestureRecognizer.HAND_CONNECTIONS, {
@@ -134,6 +143,66 @@
                
             }
         }
+
+
+
+
+        
+        // Three.js code
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+       let scaleFactor = 1;
+
+        const animate = function () {
+            requestAnimationFrame(animate);
+
+            switch (gestureOutput.innerText) {
+                case 'Victory':
+                    cube.rotation.x += 0.01;
+                    break;
+                case 'Open_Palm':
+                    cube.rotation.y += 0.01;
+                    break;
+                case 'Closed_Fist':
+                    cube.rotation.y += 0.90;
+                    break;
+                case 'Thumb_Up':
+                    cube.rotation.z += 0.01;
+                    break;
+                case 'Thumb_Down':
+                    cube.rotation.z -= 0.01;
+                case 'Pointing_Up':
+                    scaleFactor += 0.01; // Adjust the increment as needed
+                    cube.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    break;
+                case 'ILoveYou':
+                    scaleFactor -= 0.01; // Adjust the increment as needed
+                    cube.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    break;
+                    
+                default:
+                    scaleFactor = 1;
+                    cube.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                    break;
+            }
+
+
+            renderer.render(scene, camera);
+        };
+
+        animate();
     </script>
 
 
